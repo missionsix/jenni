@@ -7,8 +7,50 @@ Patrick Andrew <missionsix@gmail.com>
 
 import httplib
 import json
+import sys
 
 from datetime import timedelta
+
+
+class NotModifiedError(Exception):
+    def __init__(self):
+        super(NotModifiedError, self).__init__(
+            "The data hasn't changed since your last request.")
+
+class ForbiddenError(Exception):
+    def __init__(self):
+        super(ForbiddenError, self).__init__(
+            "The rate-limiting has kicked in.  Please try again later.")
+
+class NotFoundException(LookupError):
+    def __init__(self):
+        super(NotFoundException, self).__init__(
+            "Could not find that Spotify URI.")
+
+class BadRequestException(LookupError):
+    def __init__(self):
+        super(BadRequestException, self).__init__(
+            "The request was not understood.")
+
+class InternalServerError(Exception):
+    def __init__(self):
+        super(InternalServerError, self).__init__(
+            "The server encounted an unexpected problem.")
+
+class ServiceUnavailable(Exception):
+    def __init__(self):
+        super(ServiceUnavailable, self).__init__(
+            "The API is temporarily unavailable.")
+
+SpotifyStatusCodes = {
+    304: NotModifiedError,
+    400: BadRequestException,
+    403: ForbiddenError,
+    404: NotFoundException,
+    500: InternalServerError,
+    503: ServiceUnavailable
+    }
+
 
 class Spotify:
 
@@ -27,13 +69,15 @@ class Spotify:
         if extras is not None:
             lookup_url += "&extras=%s" % extras
 
-
         self.conn.request("GET", lookup_url)
         resp = self.conn.getresponse()
         if resp.status == 200:
             result = json.loads(resp.read())
             return result
-        raise ValueError
+        try:
+            raise SpotifyStatusCodes[resp.status]
+        except ValueError:
+            raise Exception("Unknown response from the Spotify API")
 
 
 def notify(jenni, recipient, text):
@@ -47,9 +91,12 @@ def print_album(jenni, album):
 def print_artist(jenni, artist):
     jenni.say("Artist: %s" % artist['name'])
 
-def print_track(jenni, track):        
+def print_track(jenni, track):
+    length = str(timedelta(seconds=track['length']))[2:7]
+    if length[0] == '0':
+        length = length[1:]
     jenni.say("%s by %s" % (track['name'],track['artists'][0]['name']))
-    jenni.say("   Length: %s" % timedelta(seconds=track['length']))
+    jenni.say("   Length: %s" % length)
     jenni.say("   Album: \"%s\" " % track['album']['name'])
 
 
@@ -71,8 +118,9 @@ def query(jenni, input):
     try:
         type = result['info']['type']
         formatters[type](jenni, result[type])
-    except KeyError:
-        jenni.say("Unknown response from Spotify API")
+    except:
+        e = sys.exec_info()[0]
+        notify(jenni, input.nick, e)
 
 query.rule = r'spotify:(.*)$'
 query.priority = 'low'
