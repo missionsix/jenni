@@ -64,7 +64,7 @@ class Spotify:
         self.conn.close()
 
     def lookup(self, uri, extras=None):
-        
+
         lookup_url = "%s?uri=%s" % (self.service_url, uri)
         if extras is not None:
             lookup_url += "&extras=%s" % extras
@@ -105,8 +105,9 @@ def query(jenni, input):
     result = None
     try:
         result = spotify.lookup(input)
-    except ValueError:
-        notify(jenni, input.nick, 'Sorry, I could not lookup %s at this time.' % input)
+    except:
+        e = sys.exec_info()[0]
+        notify(jenni, input.nick, e)
         return
 
     formatters = {
@@ -118,9 +119,8 @@ def query(jenni, input):
     try:
         type = result['info']['type']
         formatters[type](jenni, result[type])
-    except:
-        e = sys.exec_info()[0]
-        notify(jenni, input.nick, e)
+    except KeyError:
+        notify(jenni, input.nick, "Unknown response from API server")
 
 query.rule = r'spotify:(.*)$'
 query.priority = 'low'
