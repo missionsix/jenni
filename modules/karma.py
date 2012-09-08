@@ -5,21 +5,22 @@ Copyright 2012
     John Ryan
     Patrick Andrew
 """
-import copy
 import datetime
 import operator
 import pickle
 import re
 import time
 
-twoseconds=datetime.timedelta(seconds=2)
+twoseconds = datetime.timedelta(seconds=2)
+upvoterate = datetime.timedelta(seconds=30)
 
 # dict of channel/last person to talk that didn't say +1
 LAST_NICK = dict()
+HISTORY = dict()
 
 class kdict(dict):
 
-      db_file = 'karma.pkl'
+      db_file = '/ifs/home/pandrew/.jenni/karma.pkl'
 
       def __init__(self):
             print "Loading karma"
@@ -67,21 +68,30 @@ def notify(jenni, recipient, text):
 def plusplus(jenni, input):
     name = input.group(1).lstrip().rstrip()
 
-    #print "name=%s, LAST_NICK=%s" % (name, LAST_NICK.get(input.sender, 'aaa'))
+    upvote_time = datetime.datetime.now()
 
     if name == '' or not name or len(name) == 0:
         name = LAST_NICK.get(input.sender, 'ShazBot')
 
-    #print "name=%s, LAST_NICK=%s" % (name, LAST_NICK.get(input.sender, 'aaa'))
+    try:
+          last_upvote = HISTORY[input.nick]
+          if (upvote_time - last_upvote) < upvoterate:
+                new_upvote = last_upvote + upvoterate
+                notify(jenni, input.nick, "You may not upvote until: %s" % new_upvote.strftime("%H:%M:%S"))
+                return
+    except KeyError:
+          pass
 
     if name == input.nick:
         print "%s downvoting %s" % (input.nick, name)
         KARMADICT[name] = -1
     else:
-        print "%s upvoting %s" % (input.nick, name)
+        print "%s upvoting %s at %s" %(input.nick, name, upvote_time.strftime("%H:%M:%S"))
         KARMADICT[name] = 1
 
-    #notify(jenni,input.nick,"%s is now at %d karma." % (name, KARMADICT[name]))
+    HISTORY[input.nick] = upvote_time
+
+
 
 plusplus.rule = r'\+1(.*)$'
 plusplus.priority = 'low'
@@ -97,10 +107,6 @@ def minusminus(jenni, input):
     print "%s downvoting %s" % (input.nick, name)
     KARMADICT[name] = -1
 
-    #notify(jenni,input.nick,"%s is now at %d karma." % (name, KARMADICT[name]))
-
-#  else:
-#    notify(jenni,input.nick,"Please wait until 5 minutes after %s." % datetime.datetime.fromtimestamp(float(status)))
 minusminus.rule = r'-1 (.*)$'
 minusminus.priority = 'low'
 
