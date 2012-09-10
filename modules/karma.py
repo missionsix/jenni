@@ -77,7 +77,9 @@ def plusplus(jenni, input):
           last_upvote = HISTORY[input.nick]
           if (upvote_time - last_upvote) < upvoterate:
                 new_upvote = last_upvote + upvoterate
-                notify(jenni, input.nick, "You may not upvote until: %s" % new_upvote.strftime("%H:%M:%S"))
+                notify(jenni, input.nick,
+                       "You may not upvote until: %s" 
+                       % new_upvote.strftime("%H:%M:%S"))
                 return
     except KeyError:
           pass
@@ -86,7 +88,8 @@ def plusplus(jenni, input):
         print "%s downvoting %s" % (input.nick, name)
         KARMADICT[name] = -1
     else:
-        print "%s upvoting %s at %s" %(input.nick, name, upvote_time.strftime("%H:%M:%S"))
+        print "%s upvoting %s at %s" %(input.nick, name, 
+                                       upvote_time.strftime("%H:%M:%S"))
         KARMADICT[name] = 1
 
     HISTORY[input.nick] = upvote_time
