@@ -64,7 +64,6 @@ KARMADICT = kdict()
 def notify(jenni, recipient, text):
     jenni.write(('NOTICE', recipient), text)
 
-
 def plusplus(jenni, input):
     name = input.group(1).lstrip().rstrip()
 
@@ -107,8 +106,21 @@ def minusminus(jenni, input):
     if name == '' or not name or len(name) == 0:
         name = LAST_NICK.get(input.sender, 'ShazBot')
 
+    try:
+          last_upvote = HISTORY[input.nick]
+          if (upvote_time - last_upvote) < upvoterate:
+                new_upvote = last_upvote + upvoterate
+                notify(jenni, input.nick,
+                       "You may not upvote until: %s" 
+                       % new_upvote.strftime("%H:%M:%S"))
+                return
+    except KeyError:
+          pass
+
     print "%s downvoting %s" % (input.nick, name)
     KARMADICT[name] = -1
+
+    HISTORY[input.nick] = upvote_time
 
 minusminus.rule = r'-1 (.*)$'
 minusminus.priority = 'low'
