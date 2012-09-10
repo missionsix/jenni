@@ -102,7 +102,7 @@ plusplus.priority = 'low'
 
 def minusminus(jenni, input):
     print "%s downvoting %s" % (input.nick, str(input))
-    name = input.group(1).lstrip.rstrip()
+    name = input.group(1).lstrip().rstrip()
 
     if name == '' or not name or len(name) == 0:
         name = LAST_NICK.get(input.sender, 'ShazBot')
