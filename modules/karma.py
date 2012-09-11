@@ -14,13 +14,15 @@ import time
 twoseconds = datetime.timedelta(seconds=2)
 upvoterate = datetime.timedelta(seconds=30)
 
+KARMA_TOPIC_REGEX = '([\w\s]+){1,20}'
+
 # dict of channel/last person to talk that didn't say +1
 LAST_NICK = dict()
 HISTORY = dict()
 
 class kdict(dict):
 
-      db_file = '/ifs/home/pandrew/.jenni/karma.pkl'
+      db_file = '/home/pandrew/.jenni/karma.pkl'
 
       def __init__(self):
             print "Loading karma"
@@ -95,7 +97,7 @@ def plusplus(jenni, input):
 
 
 
-plusplus.rule = r'\+1(.*)$'
+plusplus.rule = r'.*\+1%s' % KARMA_TOPIC_REGEX
 plusplus.priority = 'low'
 
 
@@ -124,7 +126,7 @@ def minusminus(jenni, input):
 
     HISTORY[input.nick] = downvote_time
 
-minusminus.rule = r'-1 (.*)$'
+minusminus.rule = r'.*-1%s' % KARMA_TOPIC_REGEX
 minusminus.priority = 'low'
 
 
