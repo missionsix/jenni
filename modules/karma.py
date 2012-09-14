@@ -11,6 +11,8 @@ import pickle
 import re
 import time
 
+from pprint import pprint 
+
 twoseconds = datetime.timedelta(seconds=2)
 upvoterate = datetime.timedelta(seconds=30)
 
@@ -22,6 +24,7 @@ HISTORY = dict()
 
 class kdict(dict):
 
+      # TODO: update this path
       db_file = '/home/pandrew/.jenni/karma.pkl'
 
       def __init__(self):
@@ -67,13 +70,16 @@ def notify(jenni, recipient, text):
     jenni.write(('NOTICE', recipient), text)
 
 def plusplus(jenni, input):
-    name = input.group(1).lstrip().rstrip()
 
+    if input.nick == input.sender:
+          notify(jenni, input.nick, "Bite my shiny metal ass!")
+          return
+
+    name = input.group(1).lstrip().rstrip()
     upvote_time = datetime.datetime.now()
 
     if name == '' or not name or len(name) == 0:
         name = LAST_NICK.get(input.sender, 'ShazBot')
-
     try:
           last_upvote = HISTORY[input.nick]
           if (upvote_time - last_upvote) < upvoterate and name != input.nick:
@@ -96,20 +102,21 @@ def plusplus(jenni, input):
     HISTORY[input.nick] = upvote_time
 
 
-
 plusplus.rule = r'.*\+1%s' % KARMA_TOPIC_REGEX
 plusplus.priority = 'low'
 
 
 def minusminus(jenni, input):
-    print "%s downvoting %s" % (input.nick, str(input))
-    name = input.group(1).lstrip().rstrip()
 
+    if input.nick == input.sender:
+          notify(jenni, input.nick, "Bite my shiny metal ass!")
+          return
+
+    name = input.group(1).lstrip().rstrip()
     downvote_time = datetime.datetime.now()
 
     if name == '' or not name or len(name) == 0:
-        name = LAST_NICK.get(input.sender, 'ShazBot')
-
+        name = LAST_NICK.get(input.sender, 'Bender')
     try:
           last_upvote = HISTORY[input.nick]
           if (downvote_time - last_upvote) < upvoterate:
@@ -125,6 +132,7 @@ def minusminus(jenni, input):
     KARMADICT[name] = -1
 
     HISTORY[input.nick] = downvote_time
+
 
 minusminus.rule = r'.*-1%s' % KARMA_TOPIC_REGEX
 minusminus.priority = 'low'
@@ -154,17 +162,6 @@ def karmarank(jenni, input):
     time.sleep(0.5)
     jenni.say(msg2)
 karmarank.rule=r'\.rank$'
-
-
-def whokarma(jenni, input):
-      sorted_karma = sorted(KARMADICT.iteritems(), key=operator.itemgetter(1))
-      if len(sorted_karma) == 0:
-            jenni.say('No karma history')
-            return
-      msg = [ "%s: %d" % (x[0], x[1]) for x in sorted_karma ]
-      print 'printing karma list'
-      jenni.say(', '.join(msg))
-whokarma.rule=r'\.stats$'
 
 
 def lastnick(jenni, input):
