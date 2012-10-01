@@ -103,9 +103,9 @@ def print_track(jenni, track):
 def query(jenni, input):
     spotify = Spotify()
     result = None
+    lookup = input.group(1).lstrip().rstrip()
     try:
-        print input
-        result = spotify.lookup(input)
+        result = spotify.lookup('spotify:%s' % lookup)
     except:
         e = sys.exc_info()[0]
         notify(jenni, input.nick, e)
