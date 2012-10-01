@@ -79,7 +79,7 @@ def plusplus(jenni, input):
     upvote_time = datetime.datetime.now()
 
     if name == '' or not name or len(name) == 0:
-        name = LAST_NICK.get(input.sender, 'ShazBot')
+        name = LAST_NICK.get(input.sender, jenni.nick)
     try:
           last_upvote = HISTORY[input.nick]
           if (upvote_time - last_upvote) < upvoterate and name != input.nick:
@@ -116,7 +116,7 @@ def minusminus(jenni, input):
     downvote_time = datetime.datetime.now()
 
     if name == '' or not name or len(name) == 0:
-        name = LAST_NICK.get(input.sender, 'Bender')
+        name = LAST_NICK.get(input.sender, jenni.nick)
     try:
           last_upvote = HISTORY[input.nick]
           if (downvote_time - last_upvote) < upvoterate:
