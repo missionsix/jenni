@@ -104,9 +104,10 @@ def query(jenni, input):
     spotify = Spotify()
     result = None
     try:
+        print input
         result = spotify.lookup(input)
     except:
-        e = sys.exec_info()[0]
+        e = sys.exc_info()[0]
         notify(jenni, input.nick, e)
         return
 
