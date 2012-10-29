@@ -141,7 +141,7 @@ minusminus.priority = 'low'
 def askkarma(jenni, input):
     name=input.group(1).lstrip().rstrip() or input.nick
     jenni.say("%s is at %d karma." % (name, KARMADICT[name]))
-askkarma.rule=r'\.karma(.*)'
+askkarma.rule=r'\.karma%s' % KARMA_TOPIC_REGEX
 
 
 def karmarank(jenni, input):
