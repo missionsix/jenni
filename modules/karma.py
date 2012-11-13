@@ -16,7 +16,7 @@ from pprint import pprint
 twoseconds = datetime.timedelta(seconds=2)
 upvoterate = datetime.timedelta(seconds=30)
 
-KARMA_TOPIC_REGEX = '([\w\s]+){1,20}'
+KARMA_TOPIC_REGEX = '([\w\s]+){0,20}'
 
 # dict of channel/last person to talk that didn't say +1
 LAST_NICK = dict()
@@ -75,7 +75,8 @@ def plusplus(jenni, input):
           notify(jenni, input.nick, "Bite my shiny metal ass!")
           return
 
-    name = input.group(1).lstrip().rstrip()
+    topic = input.group(1)
+    name = topic.lstrip().rstrip() if topic else ''
     upvote_time = datetime.datetime.now()
 
     if name == '' or not name or len(name) == 0:
@@ -112,8 +113,8 @@ def minusminus(jenni, input):
           notify(jenni, input.nick, "Bite my shiny metal ass!")
           return
 
-    name = input.group(1).lstrip().rstrip()
-    downvote_time = datetime.datetime.now()
+    topic = input.group(1)
+    name = topic.lstrip().rstrip() if topic else ''
 
     if name == '' or not name or len(name) == 0:
         name = LAST_NICK.get(input.sender, jenni.nick)
@@ -139,7 +140,8 @@ minusminus.priority = 'low'
 
 
 def askkarma(jenni, input):
-    name=input.group(1).lstrip().rstrip() or input.nick
+    topic = input.group(1)
+    name = topic.lstrip().rstrip() if topic else input.nick
     jenni.say("%s is at %d karma." % (name, KARMADICT[name]))
 askkarma.rule=r'\.karma%s' % KARMA_TOPIC_REGEX
 
