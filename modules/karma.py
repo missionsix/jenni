@@ -115,6 +115,7 @@ def minusminus(jenni, input):
 
     topic = input.group(1)
     name = topic.lstrip().rstrip() if topic else ''
+    downvote_time = datetime.datetime.now()
 
     if name == '' or not name or len(name) == 0:
         name = LAST_NICK.get(input.sender, jenni.nick)
